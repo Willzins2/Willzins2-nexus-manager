@@ -18,6 +18,10 @@ import { dashboardRouter } from './modules/dashboard/dashboard.routes';
 import { reportsRouter } from './modules/reports/reports.routes';
 import { usersRouter } from './modules/users/users.routes';
 import { tasksRouter } from './modules/tasks/tasks.routes';
+import { billingRouter, requireFeature } from './modules/billing/billing.routes';
+import { onboardingRouter } from './modules/onboarding/onboarding.routes';
+import { importsRouter } from './modules/imports/imports.routes';
+import { emailsRouter } from './modules/emails/emails.routes';
 
 export function createApp() {
   const app = express();
@@ -40,7 +44,7 @@ export function createApp() {
   );
   const origins = env.CORS_ORIGINS?.split(',').map((o) => o.trim()) ?? [env.APP_URL];
   app.use(cors({ origin: origins, credentials: true }));
-  app.use(express.json({ limit: '1mb' }));
+  app.use(express.json({ limit: '5mb' })); // 5 MB comporta importações de até 2.000 linhas
   app.use(cookieParser());
   if (env.NODE_ENV !== 'test') app.use(morgan(isProd ? 'combined' : 'dev'));
 
@@ -55,15 +59,23 @@ export function createApp() {
   api.use('/customers', requireAuth, customersRouter);
   api.use('/products', requireAuth, productsRouter);
   api.use('/sales', requireAuth, salesRouter);
-  api.use('/reports', requireAuth, requireRole('ADMIN', 'MANAGER'), reportsRouter);
+  api.use('/reports', requireAuth, requireRole('ADMIN', 'MANAGER'), requireFeature('reports'), reportsRouter);
   api.use('/users', requireAuth, usersRouter);
-  api.use('/tasks', requireAuth, tasksRouter);
+  api.use('/tasks', requireAuth, requireFeature('tasks'), tasksRouter);
+  api.use('/billing', billingRouter);
+  api.use('/onboarding', requireAuth, onboardingRouter);
+  api.use('/import', requireAuth, importsRouter);
+  api.use('/emails', requireAuth, emailsRouter);
   api.use(notFoundHandler);
   app.use('/api/v1', api);
 
   // ---- Frontend (build do React) servido pelo mesmo processo em produção ----
   const webDist = path.resolve(__dirname, '../../web/dist');
   if (fs.existsSync(webDist)) {
+    // O service worker precisa ser revalidado sempre; arquivos com hash no nome podem ficar em cache por 1 ano.
+    app.get('/sw.js', (_req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(webDist, 'sw.js')));
+    app.get('/manifest.webmanifest', (_req, res) => res.type('application/manifest+json').sendFile(path.join(webDist, 'manifest.webmanifest')));
+    app.use('/assets', express.static(path.join(webDist, 'assets'), { maxAge: '1y', immutable: true }));
     app.use(express.static(webDist, { maxAge: '1h', index: false }));
     app.get('*', (_req, res) => res.sendFile(path.join(webDist, 'index.html')));
   }

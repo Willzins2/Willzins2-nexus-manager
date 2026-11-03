@@ -46,7 +46,7 @@ usersRouter.post(
   '/',
   validate({ body: createUserSchema }),
   asyncHandler(async (req, res) => {
-    res.status(201).json(await service.create(authUser(req).organizationId, req.body));
+    res.status(201).json(await service.create(authUser(req).organizationId, req.body, authUser(req).name));
   }),
 );
 

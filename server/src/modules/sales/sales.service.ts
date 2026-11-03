@@ -4,6 +4,7 @@ import { prisma } from '../../lib/prisma';
 import { forbidden, notFound, unprocessable } from '../../lib/errors';
 import { paged, paginate } from '../../lib/http';
 import type { AuthUser } from '../../middleware/auth';
+import { assertLimit } from '../billing/billing.service';
 import type { createSaleSchema, listSalesSchema } from './sales.schemas';
 
 const D = (v: Prisma.Decimal.Value) => new Prisma.Decimal(v);
@@ -60,6 +61,7 @@ export async function get(orgId: string, id: string) {
  */
 export async function create(user: AuthUser, input: z.infer<typeof createSaleSchema>) {
   const orgId = user.organizationId;
+  await assertLimit(orgId, 'salesPerMonth');
   return prisma.$transaction(async (tx) => {
     if (input.customerId) {
       const c = await tx.customer.findFirst({ where: { id: input.customerId, organizationId: orgId }, select: { id: true } });

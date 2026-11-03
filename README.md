@@ -16,6 +16,11 @@ SaaS de gestão empresarial para pequenos negócios: **clientes, vendas, produto
 | **Relatórios** | Período livre ou atalhos (mês, 3, 6, 12 meses): faturamento, custo, lucro bruto, margem, ticket médio, cancelamentos; faturamento × lucro por mês; ranking de produtos, clientes, vendedores, categorias e formas de pagamento; **exportação CSV** |
 | **Tarefas** | Quadro kanban (a fazer / em andamento / concluída) com arrastar e soltar, prioridade, prazo (destaque de atraso), responsável e cliente relacionado |
 | **Usuários** | Gestão da equipe com perfis **Administrador, Gerente e Vendedor**; ativar/desativar; matriz de permissões |
+| **Planos e assinatura** | Grátis, Essencial, Profissional e Empresa; teste grátis de 14 dias do Profissional; cobrança recorrente mensal/anual via **Asaas** (Pix, boleto ou cartão); limites por plano (usuários, produtos, vendas/mês) |
+| **Primeiros passos** | Cartão no dashboard que guia o primeiro uso: cadastrar produto, cliente e venda |
+| **Importação** | Clientes e produtos por planilha **Excel (.xlsx) ou CSV**, com prévia e validação linha a linha antes de gravar |
+| **E-mails** | Boas-vindas, convite de usuário, recuperação de senha e **resumo semanal de vendas** (segunda, 8h) |
+| **Modo escuro e app** | Tema claro/escuro/automático; instalável no celular e no computador (PWA) |
 
 ## Stack e justificativa
 
@@ -116,6 +121,18 @@ npm test
 4. O start (`npm run start:demo`) aplica as migrations e cria a empresa de demonstração se ela não existir.
 
 Para produção real: remova `DEMO_MODE`, configure `SMTP_*` para enviar os e-mails de recuperação, e use `npm start` (sem seed).
+
+### Cobrança com Asaas
+
+1. Crie uma conta no [Asaas](https://www.asaas.com) (para testar, use o [sandbox](https://sandbox.asaas.com)).
+2. Em **Integrações → Chaves de API**, gere a chave e defina no Render: `ASAAS_API_KEY`, `ASAAS_ENV` (`sandbox` ou `production`).
+3. Em **Integrações → Webhooks**, crie um webhook para `https://SEU-APP/api/v1/billing/webhook/asaas` com os eventos de **Cobranças** e **Assinaturas**, e defina um token de autenticação. Coloque o mesmo token em `ASAAS_WEBHOOK_TOKEN`.
+
+Sem `ASAAS_API_KEY`, a assinatura funciona em **modo simulado** (só em desenvolvimento ou com `DEMO_MODE=true`): o plano é ativado na hora, sem cobrança.
+
+### Resumo semanal
+
+Com `WEEKLY_SUMMARY_ENABLED=true` (padrão), o servidor envia toda segunda às 8h (Brasília) o resumo para administradores e gerentes que não desativaram a opção no perfil. Em hospedagem que hiberna (Render grátis), agende `node server/dist/jobs/weekly-summary.js` como Cron Job.
 
 > O plano gratuito do Render hiberna após 15 min sem acesso (a primeira requisição leva ~1 min) e o banco gratuito expira em 30 dias.
 

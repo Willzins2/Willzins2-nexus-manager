@@ -11,6 +11,8 @@ export default defineConfig({
       DATABASE_URL: process.env.TEST_DATABASE_URL ?? 'postgresql://nexus:nexus@localhost:5432/nexus_test',
       JWT_SECRET: 'test-secret-test-secret-test-secret-123',
       DEMO_MODE: 'true',
+      ASAAS_WEBHOOK_TOKEN: 'test-webhook-token',
+      WEEKLY_SUMMARY_ENABLED: 'false',
     },
   },
 });

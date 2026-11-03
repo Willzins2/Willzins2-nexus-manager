@@ -31,6 +31,7 @@ export const resetPasswordSchema = z.object({
 export const updateProfileSchema = z.object({
   name: z.string().trim().min(2).max(120),
   email,
+  weeklySummary: z.boolean().optional(),
 });
 
 export const changePasswordSchema = z.object({

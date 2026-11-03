@@ -58,7 +58,9 @@ async function main() {
   if (existing) await prisma.organization.delete({ where: { id: existing.organizationId } });
 
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
-  const org = await prisma.organization.create({ data: { name: 'Nexus Demo Comércio Ltda' } });
+  const org = await prisma.organization.create({
+    data: { name: 'Nexus Demo Comércio Ltda', plan: 'BUSINESS', subscriptionStatus: 'ACTIVE', currentPeriodEnd: new Date(Date.now() + 365 * 86_400_000), onboardingDismissedAt: new Date() },
+  });
   const mk = (name: string, email: string, role: 'ADMIN' | 'MANAGER' | 'SELLER') =>
     prisma.user.create({ data: { organizationId: org.id, name, email, role, passwordHash } });
   const admin = await mk('Ana Administradora', DEMO_EMAIL, 'ADMIN');

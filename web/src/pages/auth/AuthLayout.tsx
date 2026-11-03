@@ -22,7 +22,7 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
           </h2>
           <ul className="mt-8 space-y-4">
             {features.map((f) => (
-              <li key={f.text} className="flex items-center gap-3 text-slate-300">
+              <li key={f.text} className="flex items-center gap-3 text-mist-300">
                 <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-brand-300">
                   <f.icon className="h-[18px] w-[18px]" />
                 </span>
@@ -31,7 +31,7 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
             ))}
           </ul>
         </div>
-        <p className="relative text-xs text-slate-500">© {new Date().getFullYear()} Nexus Manager</p>
+        <p className="relative text-xs text-mist-500">© {new Date().getFullYear()} Nexus Manager</p>
       </div>
       <div className="flex items-center justify-center px-4 py-10 sm:px-8">
         <div className="w-full max-w-sm">

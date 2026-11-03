@@ -3,15 +3,156 @@
 @tailwind utilities;
 
 @layer base {
+  /* Paleta em variáveis: o modo escuro troca os valores, sem precisar de dark: em cada classe. */
+  :root {
+    --slate-50: 248 250 252;
+    --slate-100: 241 245 249;
+    --slate-200: 226 232 240;
+    --slate-300: 203 213 225;
+    --slate-400: 148 163 184;
+    --slate-500: 100 116 139;
+    --slate-600: 71 85 105;
+    --slate-700: 51 65 85;
+    --slate-800: 30 41 59;
+    --slate-900: 15 23 42;
+    --slate-950: 2 6 23;
+    --brand-50: 238 244 255;
+    --brand-100: 219 230 254;
+    --brand-200: 191 211 254;
+    --brand-300: 147 180 253;
+    --brand-400: 96 144 250;
+    --brand-500: 59 110 246;
+    --brand-600: 37 82 235;
+    --brand-700: 29 63 216;
+    --brand-800: 30 53 175;
+    --brand-900: 30 50 138;
+    --brand-950: 23 32 84;
+    --emerald-50: 236 253 245;
+    --emerald-100: 209 250 229;
+    --emerald-200: 167 243 208;
+    --emerald-300: 110 231 183;
+    --emerald-400: 52 211 153;
+    --emerald-500: 16 185 129;
+    --emerald-600: 5 150 105;
+    --emerald-700: 4 120 87;
+    --emerald-800: 6 95 70;
+    --emerald-900: 6 78 59;
+    --emerald-950: 2 44 34;
+    --rose-50: 255 241 242;
+    --rose-100: 255 228 230;
+    --rose-200: 254 205 211;
+    --rose-300: 253 164 175;
+    --rose-400: 251 113 133;
+    --rose-500: 244 63 94;
+    --rose-600: 225 29 72;
+    --rose-700: 190 18 60;
+    --rose-800: 159 18 57;
+    --rose-900: 136 19 55;
+    --rose-950: 76 5 25;
+    --amber-50: 255 251 235;
+    --amber-100: 254 243 199;
+    --amber-200: 253 230 138;
+    --amber-300: 252 211 77;
+    --amber-400: 251 191 36;
+    --amber-500: 245 158 11;
+    --amber-600: 217 119 6;
+    --amber-700: 180 83 9;
+    --amber-800: 146 64 14;
+    --amber-900: 120 53 15;
+    --amber-950: 69 26 3;
+    --violet-50: 245 243 255;
+    --violet-100: 237 233 254;
+    --violet-200: 221 214 254;
+    --violet-300: 196 181 253;
+    --violet-400: 167 139 250;
+    --violet-500: 139 92 246;
+    --violet-600: 124 58 237;
+    --violet-700: 109 40 217;
+    --violet-800: 91 33 182;
+    --violet-900: 76 29 149;
+    --violet-950: 46 16 101;
+    --surface: 255 255 255;
+    color-scheme: light;
+  }
+  .dark {
+    --slate-50: 11 17 32;
+    --slate-100: 21 30 48;
+    --slate-200: 36 48 73;
+    --slate-300: 51 64 92;
+    --slate-400: 107 120 145;
+    --slate-500: 139 151 171;
+    --slate-600: 168 179 197;
+    --slate-700: 196 204 217;
+    --slate-800: 219 225 234;
+    --slate-900: 238 242 247;
+    --slate-950: 248 250 252;
+    --brand-50: 20 31 66;
+    --brand-100: 24 39 90;
+    --brand-200: 34 55 125;
+    --brand-300: 58 89 184;
+    --brand-400: 96 144 250;
+    --brand-500: 79 127 248;
+    --brand-600: 59 110 246;
+    --brand-700: 143 176 252;
+    --brand-800: 179 202 253;
+    --brand-900: 212 225 254;
+    --brand-950: 232 239 254;
+    --emerald-50: 11 42 32;
+    --emerald-100: 15 58 44;
+    --emerald-200: 22 84 64;
+    --emerald-300: 110 231 183;
+    --emerald-400: 52 211 153;
+    --emerald-500: 16 185 129;
+    --emerald-600: 16 185 129;
+    --emerald-700: 52 211 153;
+    --emerald-800: 110 231 183;
+    --emerald-900: 167 243 208;
+    --emerald-950: 209 250 229;
+    --rose-50: 58 17 25;
+    --rose-100: 76 21 34;
+    --rose-200: 110 29 49;
+    --rose-300: 253 164 175;
+    --rose-400: 251 113 133;
+    --rose-500: 244 63 94;
+    --rose-600: 244 63 94;
+    --rose-700: 251 113 133;
+    --rose-800: 253 164 175;
+    --rose-900: 254 205 211;
+    --rose-950: 255 228 230;
+    --amber-50: 47 34 10;
+    --amber-100: 61 44 12;
+    --amber-200: 92 67 16;
+    --amber-300: 124 90 20;
+    --amber-400: 251 191 36;
+    --amber-500: 245 158 11;
+    --amber-600: 245 158 11;
+    --amber-700: 251 191 36;
+    --amber-800: 252 211 77;
+    --amber-900: 253 230 138;
+    --amber-950: 254 243 199;
+    --violet-50: 34 26 69;
+    --violet-100: 44 33 96;
+    --violet-200: 63 47 134;
+    --violet-300: 196 181 253;
+    --violet-400: 167 139 250;
+    --violet-500: 139 92 246;
+    --violet-600: 167 139 250;
+    --violet-700: 196 181 253;
+    --violet-800: 221 214 254;
+    --violet-900: 237 233 254;
+    --violet-950: 245 243 255;
+    --surface: 17 26 43;
+    color-scheme: dark;
+  }
   html { -webkit-font-smoothing: antialiased; }
   body { @apply bg-slate-50 text-slate-800; font-feature-settings: 'cv11', 'ss01'; }
   :focus-visible { @apply outline-none ring-2 ring-brand-500/60 ring-offset-1; }
 }
 
 @layer components {
-  .card { @apply rounded-xl border border-slate-200/80 bg-white shadow-card; }
+  .card { @apply rounded-xl border border-slate-200/80 bg-surface shadow-card; }
   .input {
-    @apply block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400
+    @apply block w-full rounded-lg border border-slate-300 bg-surface px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400
       transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:bg-slate-50 disabled:text-slate-500;
   }
   .input-error { @apply border-rose-400 focus:border-rose-500 focus:ring-rose-500/20; }
@@ -21,7 +162,7 @@
       disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary { @apply btn bg-brand-600 text-white shadow-sm hover:bg-brand-700; }
-  .btn-secondary { @apply btn border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-50; }
+  .btn-secondary { @apply btn border border-slate-300 bg-surface text-slate-700 shadow-sm hover:bg-slate-50; }
   .btn-ghost { @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900; }
   .btn-danger { @apply btn bg-rose-600 text-white shadow-sm hover:bg-rose-700; }
   .btn-icon { @apply btn p-2; }
@@ -30,4 +171,6 @@
   .table td { @apply border-b border-slate-100 px-4 py-3 align-middle; }
   .table tbody tr { @apply transition-colors hover:bg-slate-50/70; }
   .num { font-variant-numeric: tabular-nums; }
+  .dark .shadow-card { box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .dark .table th { @apply bg-slate-100/60; }
 }

@@ -10,7 +10,7 @@ import { useAuth } from '../auth/AuthContext';
 import { PriorityBadge } from '../components/badges';
 import { ConfirmDialog, ErrorState, Field, Input, Modal, PageHeader, PageLoader, Select, Spinner, Textarea, cn } from '../components/ui';
 import { date, taskStatusLabel } from '../lib/format';
-import { errorMessage, handleFormError } from '../lib/forms';
+import { errorMessage, handleFormError, toastError } from '../lib/forms';
 import type { Customer, Paged, Task, TaskStatus } from '../lib/types';
 
 const columns: TaskStatus[] = ['TODO', 'IN_PROGRESS', 'DONE'];
@@ -92,14 +92,14 @@ export default function Tasks() {
       qc.setQueryData<Task[]>(key, (ts) => ts?.map((t) => (t.id === id ? { ...t, status } : t)));
       return { prev };
     },
-    onError: (e, _v, ctx) => { qc.setQueryData(key, ctx?.prev); toast.error(errorMessage(e)); },
+    onError: (e, _v, ctx) => { qc.setQueryData(key, ctx?.prev); toastError(e); },
     onSettled: () => { qc.invalidateQueries({ queryKey: ['tasks'] }); qc.invalidateQueries({ queryKey: ['dashboard'] }); },
   });
 
   const del = useMutation({
     mutationFn: (id: string) => api.delete(`/tasks/${id}`),
     onSuccess: () => { toast.success('Tarefa excluída'); qc.invalidateQueries({ queryKey: ['tasks'] }); setDeleting(null); setEditing(null); },
-    onError: (e) => toast.error(errorMessage(e)),
+    onError: (e) => toastError(e),
   });
 
   const today = new Date().toISOString().slice(0, 10);
@@ -129,7 +129,7 @@ export default function Tasks() {
                     const overdue = t.dueDate && t.status !== 'DONE' && t.dueDate.slice(0, 10) < today;
                     return (
                       <li key={t.id} draggable onDragStart={() => setDragging(t.id)} onDragEnd={() => setDragging(null)}
-                        className={cn('group cursor-grab rounded-lg border border-slate-200 bg-white p-3 shadow-card transition hover:border-brand-200 active:cursor-grabbing', dragging === t.id && 'opacity-50')}>
+                        className={cn('group cursor-grab rounded-lg border border-slate-200 bg-surface p-3 shadow-card transition hover:border-brand-200 active:cursor-grabbing', dragging === t.id && 'opacity-50')}>
                         <button className="block w-full text-left" onClick={() => setEditing({ task: t, status: t.status })}>
                           <div className="flex items-start justify-between gap-2">
                             <p className={cn('text-sm font-medium text-slate-900', t.status === 'DONE' && 'text-slate-500 line-through')}>{t.title}</p>
