@@ -26,7 +26,8 @@ const schema = z.object({
     .transform((v) => v === 'true'),
 });
 
-const parsed = schema.safeParse(process.env);
+// No Render, a URL pública vem em RENDER_EXTERNAL_URL: usada quando APP_URL não foi definida.
+const parsed = schema.safeParse({ ...process.env, APP_URL: process.env.APP_URL || process.env.RENDER_EXTERNAL_URL || undefined });
 if (!parsed.success) {
   console.error('❌ Variáveis de ambiente inválidas:', parsed.error.flatten().fieldErrors);
   process.exit(1);

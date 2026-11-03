@@ -112,7 +112,7 @@ npm test
 
 1. Suba este repositório para o GitHub.
 2. No Render: **New → Blueprint** → selecione o repositório. O `render.yaml` cria o PostgreSQL e o serviço web.
-3. Ajuste `APP_URL` para a URL gerada (ex.: `https://nexus-manager.onrender.com`).
+3. `APP_URL` é preenchida automaticamente com a URL pública do Render; defina-a só se usar domínio próprio.
 4. O start (`npm run start:demo`) aplica as migrations e cria a empresa de demonstração se ela não existir.
 
 Para produção real: remova `DEMO_MODE`, configure `SMTP_*` para enviar os e-mails de recuperação, e use `npm start` (sem seed).

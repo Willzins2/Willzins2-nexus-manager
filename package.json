@@ -3,8 +3,8 @@
   "private": true,
   "description": "SaaS de gestão empresarial para pequenos negócios: clientes, vendas, produtos/estoque, tarefas e relatórios.",
   "scripts": {
-    "install:all": "npm ci --prefix server && npm ci --prefix web",
-    "build": "npm run install:all && npm run build --prefix web && npm run build --prefix server",
+    "install:all": "npm ci --include=dev --prefix server && npm ci --include=dev --prefix web",
+    "build": "npm run install:all && npm run build --prefix web && npm run build --prefix server && npm prune --omit=dev --prefix server",
     "start": "npm run db:deploy --prefix server && npm start --prefix server",
     "start:demo": "npm run db:deploy --prefix server && node server/dist/seed.js --if-empty && npm start --prefix server",
     "dev:server": "npm run dev --prefix server",
