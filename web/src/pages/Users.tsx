@@ -9,7 +9,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import { Badge, ConfirmDialog, ErrorState, Field, Input, Modal, PageHeader, PageLoader, Select, Spinner, type Tone } from '../components/ui';
 import { dateTime, initials, roleLabel } from '../lib/format';
-import { errorMessage, handleFormError } from '../lib/forms';
+import { errorMessage, handleFormError, toastError } from '../lib/forms';
 import { email, password } from '../lib/schemas';
 import type { Role, User } from '../lib/types';
 
@@ -75,7 +75,7 @@ export default function Users() {
   const del = useMutation({
     mutationFn: (id: string) => api.delete(`/users/${id}`),
     onSuccess: () => { toast.success('Usuário excluído'); qc.invalidateQueries({ queryKey: ['users'] }); setDeleting(null); },
-    onError: (e) => toast.error(errorMessage(e)),
+    onError: (e) => toastError(e),
   });
 
   return (

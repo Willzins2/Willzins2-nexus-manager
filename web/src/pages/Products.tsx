@@ -5,13 +5,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { ArrowDownUp, History, Package, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowDownUp, FileSpreadsheet, History, Package, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ImportModal, productImport } from '../components/ImportModal';
 import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import { Badge, ConfirmDialog, EmptyState, ErrorState, Field, Input, Modal, PageHeader, PageLoader, Pagination, SearchInput, Select, Spinner, Textarea, cn } from '../components/ui';
 import { StockBadge } from '../components/badges';
 import { dateTime, int, money, movementLabel, percent } from '../lib/format';
-import { errorMessage, handleFormError } from '../lib/forms';
+import { errorMessage, handleFormError, toastError } from '../lib/forms';
 import { useListState } from '../lib/useList';
 import type { Paged, Product, StockMovement } from '../lib/types';
 
@@ -159,11 +160,20 @@ export default function Products() {
   const { can } = useAuth();
   const manage = can('ADMIN', 'MANAGER');
   const qc = useQueryClient();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const { search, setSearch, debounced, page, setPage } = useListState();
   const [category, setCategory] = useState('');
   const [stock, setStock] = useState(params.get('stock') ?? 'all');
-  const [editing, setEditing] = useState<Product | null | undefined>(undefined);
+  const [editing, setEditing] = useState<Product | null | undefined>(params.get('novo') && manage ? null : undefined);
+  const [importing, setImporting] = useState(!!params.get('importar') && manage);
+  useEffect(() => {
+    if (params.get('novo') || params.get('importar')) {
+      const next = new URLSearchParams(params);
+      next.delete('novo');
+      next.delete('importar');
+      setParams(next, { replace: true });
+    }
+  }, [params, setParams]);
   const [moving, setMoving] = useState<Product | null>(null);
   const [history, setHistory] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState<Product | null>(null);
@@ -182,13 +192,16 @@ export default function Products() {
       qc.invalidateQueries({ queryKey: ['products'] });
       setDeleting(null);
     },
-    onError: (e) => toast.error(errorMessage(e)),
+    onError: (e) => toastError(e),
   });
 
   return (
     <>
       <PageHeader title="Produtos e estoque" subtitle="Catálogo, preços e controle de estoque."
-        actions={manage && <button className="btn-primary" onClick={() => setEditing(null)}><Plus className="h-4 w-4" /> Novo produto</button>} />
+        actions={manage && <>
+          <button className="btn-secondary" onClick={() => setImporting(true)}><FileSpreadsheet className="h-4 w-4" /> Importar</button>
+          <button className="btn-primary" onClick={() => setEditing(null)}><Plus className="h-4 w-4" /> Novo produto</button>
+        </>} />
 
       <div className="card">
         <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row">
@@ -249,6 +262,7 @@ export default function Products() {
       <Modal open={!!history} onClose={() => setHistory(null)} title={`Histórico · ${history?.name ?? ''}`} size="lg">
         {history && <Movements product={history} />}
       </Modal>
+      <ImportModal open={importing} onClose={() => setImporting(false)} config={productImport} />
       <ConfirmDialog open={!!deleting} onClose={() => setDeleting(null)} danger confirmLabel="Excluir" loading={del.isPending} title="Excluir produto"
         message={<>Excluir <strong>{deleting?.name}</strong>? Se o produto já tiver vendas, ele será apenas desativado para preservar o histórico.</>}
         onConfirm={() => deleting && del.mutate(deleting.id)} />

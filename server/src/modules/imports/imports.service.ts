@@ -72,7 +72,9 @@ const parseNumber = (v: unknown) => {
 const toText = (v: unknown) => (v === undefined || v === null ? undefined : String(v));
 
 const zodErrors = (rowNum: number, err: ZodError): ImportError[] =>
-  err.issues.map((i) => ({ row: rowNum, field: String(i.path[0] ?? ''), message: i.message }));
+  err.issues
+    .filter((i, idx, all) => all.findIndex((o) => o.path[0] === i.path[0]) === idx) // 1 erro por campo
+    .map((i) => ({ row: rowNum, field: String(i.path[0] ?? ''), message: i.message }));
 
 export async function importCustomers(orgId: string, rows: Row[], dryRun: boolean) {
   const errors: ImportError[] = [];

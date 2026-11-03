@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import { BarList, RevenueArea } from '../components/charts';
 import { SaleStatusBadge } from '../components/badges';
+import { OnboardingCard } from '../components/Onboarding';
 import { ErrorState, PageHeader, PageLoader, StatCard } from '../components/ui';
 import { dateTime, int, money, paymentLabel, shortDay } from '../lib/format';
 import { errorMessage } from '../lib/forms';
@@ -38,6 +39,8 @@ export default function Dashboard() {
         subtitle="Resumo do mês atual. Comparações com o mesmo período do mês anterior."
         actions={<Link to="/vendas/nova" className="btn-primary"><Plus className="h-4 w-4" /> Nova venda</Link>}
       />
+
+      <OnboardingCard />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Faturamento no mês" value={money(k.revenueMonth)} icon={DollarSign} trend={k.revenueGrowth} hint={<span>lucro bruto {money(k.grossProfitMonth)}</span>} />

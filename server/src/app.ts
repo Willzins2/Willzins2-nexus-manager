@@ -72,6 +72,10 @@ export function createApp() {
   // ---- Frontend (build do React) servido pelo mesmo processo em produção ----
   const webDist = path.resolve(__dirname, '../../web/dist');
   if (fs.existsSync(webDist)) {
+    // O service worker precisa ser revalidado sempre; arquivos com hash no nome podem ficar em cache por 1 ano.
+    app.get('/sw.js', (_req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(webDist, 'sw.js')));
+    app.get('/manifest.webmanifest', (_req, res) => res.type('application/manifest+json').sendFile(path.join(webDist, 'manifest.webmanifest')));
+    app.use('/assets', express.static(path.join(webDist, 'assets'), { maxAge: '1y', immutable: true }));
     app.use(express.static(webDist, { maxAge: '1h', index: false }));
     app.get('*', (_req, res) => res.sendFile(path.join(webDist, 'index.html')));
   }

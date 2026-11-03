@@ -19,6 +19,7 @@ export interface User {
   organization: { id: string; name: string };
   createdAt: string;
   lastLoginAt: string | null;
+  weeklySummary: boolean;
 }
 
 export interface Customer {

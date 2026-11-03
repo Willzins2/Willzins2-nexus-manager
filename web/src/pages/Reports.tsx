@@ -46,7 +46,7 @@ export default function Reports() {
         <div className="flex flex-wrap gap-1 rounded-lg bg-slate-100 p-1">
           {presets.map((p, i) => (
             <button key={p.label} onClick={() => setRange(p.range().map(localIso))}
-              className={cn('rounded-md px-3 py-1.5 text-sm font-medium transition', i === activePreset ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900')}>{p.label}</button>
+              className={cn('rounded-md px-3 py-1.5 text-sm font-medium transition', i === activePreset ? 'bg-surface text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900')}>{p.label}</button>
           ))}
         </div>
         <div className="flex items-center gap-2 sm:ml-auto">

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { Layout } from './components/Layout';
 import { PageLoader } from './components/ui';
+import { FeatureGate } from './components/Upgrade';
 import type { Role } from './lib/types';
 
 // Divisão de código por página: carrega só o que o usuário abre.
@@ -20,6 +21,7 @@ const Reports = lazy(() => import('./pages/Reports'));
 const Tasks = lazy(() => import('./pages/Tasks'));
 const Users = lazy(() => import('./pages/Users'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Billing = lazy(() => import('./pages/Billing'));
 
 function Private({ children, roles }: { children: ReactNode; roles?: Role[] }) {
   const { user, loading, can } = useAuth();
@@ -61,8 +63,9 @@ export default function App() {
           <Route path="vendas" element={<Sales />} />
           <Route path="vendas/nova" element={<NewSale />} />
           <Route path="vendas/:id" element={<SaleDetail />} />
-          <Route path="tarefas" element={<Tasks />} />
-          <Route path="relatorios" element={<Private roles={['ADMIN', 'MANAGER']}><Reports /></Private>} />
+          <Route path="tarefas" element={<FeatureGate feature="tasks"><Tasks /></FeatureGate>} />
+          <Route path="relatorios" element={<Private roles={['ADMIN', 'MANAGER']}><FeatureGate feature="reports"><Reports /></FeatureGate></Private>} />
+          <Route path="assinatura" element={<Private roles={['ADMIN']}><Billing /></Private>} />
           <Route path="usuarios" element={<Private roles={['ADMIN']}><Users /></Private>} />
           <Route path="perfil" element={<Profile />} />
           <Route path="*" element={<NotFound />} />

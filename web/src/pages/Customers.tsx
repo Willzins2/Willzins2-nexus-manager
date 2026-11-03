@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ImportModal, customerImport } from '../components/ImportModal';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Building2, Mail, MapPin, Pencil, Phone, Plus, Trash2, Users } from 'lucide-react';
+import { Building2, FileSpreadsheet, Mail, MapPin, Pencil, Phone, Plus, Trash2, Users } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import { ConfirmDialog, EmptyState, ErrorState, Field, Input, Modal, PageHeader, PageLoader, Pagination, SearchInput, Spinner, Textarea } from '../components/ui';
 import { SaleStatusBadge } from '../components/badges';
 import { date, money } from '../lib/format';
-import { errorMessage, handleFormError } from '../lib/forms';
+import { errorMessage, handleFormError, toastError } from '../lib/forms';
 import { useListState } from '../lib/useList';
 import type { Customer, Paged, SaleStatus } from '../lib/types';
 
@@ -130,7 +131,12 @@ export default function Customers() {
   const { can } = useAuth();
   const qc = useQueryClient();
   const { search, setSearch, debounced, page, setPage } = useListState();
-  const [editing, setEditing] = useState<Customer | null | undefined>(undefined); // undefined = fechado; null = novo
+  const [params, setParams] = useSearchParams();
+  const [editing, setEditing] = useState<Customer | null | undefined>(params.get('novo') ? null : undefined); // undefined = fechado; null = novo
+  const [importing, setImporting] = useState(!!params.get('importar'));
+  useEffect(() => {
+    if (params.get('novo') || params.get('importar')) setParams({}, { replace: true }); // atalhos vindos dos primeiros passos
+  }, [params, setParams]);
   const [viewing, setViewing] = useState<Customer | null>(null);
   const [deleting, setDeleting] = useState<Customer | null>(null);
 
@@ -147,12 +153,15 @@ export default function Customers() {
       qc.invalidateQueries({ queryKey: ['customers'] });
       setDeleting(null);
     },
-    onError: (e) => toast.error(errorMessage(e)),
+    onError: (e) => toastError(e),
   });
 
   return (
     <>
-      <PageHeader title="Clientes" subtitle="Cadastro e informações de contato." actions={<button className="btn-primary" onClick={() => setEditing(null)}><Plus className="h-4 w-4" /> Novo cliente</button>} />
+      <PageHeader title="Clientes" subtitle="Cadastro e informações de contato." actions={<>
+        <button className="btn-secondary" onClick={() => setImporting(true)}><FileSpreadsheet className="h-4 w-4" /> Importar</button>
+        <button className="btn-primary" onClick={() => setEditing(null)}><Plus className="h-4 w-4" /> Novo cliente</button>
+      </>} />
 
       <div className="card">
         <div className="border-b border-slate-100 p-4"><SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome, e-mail, telefone..." /></div>
@@ -198,6 +207,7 @@ export default function Customers() {
         footer={<button className="btn-secondary" onClick={() => { setEditing(viewing); setViewing(null); }}><Pencil className="h-4 w-4" /> Editar</button>}>
         {viewing && <CustomerView id={viewing.id} />}
       </Modal>
+      <ImportModal open={importing} onClose={() => setImporting(false)} config={customerImport} />
       <ConfirmDialog open={!!deleting} onClose={() => setDeleting(null)} danger confirmLabel="Excluir" loading={del.isPending} title="Excluir cliente"
         message={<>Tem certeza que deseja excluir <strong>{deleting?.name}</strong>? O histórico de vendas é mantido, sem o vínculo com o cliente.</>}
         onConfirm={() => deleting && del.mutate(deleting.id)} />

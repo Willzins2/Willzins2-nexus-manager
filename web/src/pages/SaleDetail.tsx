@@ -8,7 +8,7 @@ import { useAuth } from '../auth/AuthContext';
 import { SaleStatusBadge } from '../components/badges';
 import { ConfirmDialog, ErrorState, PageLoader } from '../components/ui';
 import { dateTime, money, paymentLabel } from '../lib/format';
-import { errorMessage } from '../lib/forms';
+import { errorMessage, toastError } from '../lib/forms';
 import type { Sale } from '../lib/types';
 
 export default function SaleDetail() {
@@ -26,7 +26,7 @@ export default function SaleDetail() {
       ['sales', 'products', 'dashboard'].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
       setConfirm(null);
     },
-    onError: (e) => toast.error(errorMessage(e)),
+    onError: (e) => toastError(e),
   });
 
   if (isLoading) return <PageLoader />;

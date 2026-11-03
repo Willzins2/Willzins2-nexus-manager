@@ -7,6 +7,7 @@ import { api, ApiError } from '../lib/api';
 import { Field, Input, PageHeader, Select, Spinner, Textarea, cn, useDebounced } from '../components/ui';
 import { money, paymentLabel } from '../lib/format';
 import type { Customer, Paged, PaymentMethod, Product } from '../lib/types';
+import { toastError } from '../lib/forms';
 
 interface Line {
   product: Product;
@@ -74,7 +75,7 @@ export default function NewSale() {
       navigate(`/vendas/${sale.id}`, { replace: true });
     } catch (e) {
       if (e instanceof ApiError && e.details?.length) setErrors(e.details.map((d) => d.message));
-      else toast.error(e instanceof ApiError ? e.message : 'Erro ao registrar a venda');
+      else toastError(e);
     } finally {
       setSaving(false);
     }
@@ -93,7 +94,7 @@ export default function NewSale() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input className="input pl-9" placeholder="Buscar produto (nome ou SKU)" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} aria-label="Buscar produto" />
               {ps && products && (
-                <ul className="absolute z-10 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                <ul className="absolute z-10 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-slate-200 bg-surface py-1 shadow-lg">
                   {products.data.length ? products.data.map((p) => (
                     <li key={p.id}>
                       <button type="button" disabled={p.stock <= 0} onClick={() => add(p)} className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50">
@@ -148,7 +149,7 @@ export default function NewSale() {
               <div className="relative">
                 <Input placeholder="Buscar cliente (opcional)" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} aria-label="Buscar cliente" />
                 {cs && customers && (
-                  <ul className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                  <ul className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-surface py-1 shadow-lg">
                     {customers.data.length ? customers.data.map((c) => (
                       <li key={c.id}><button type="button" className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50" onClick={() => setCustomer(c)}><span className="font-medium">{c.name}</span> <span className="text-slate-500">{c.email}</span></button></li>
                     )) : <li className="px-3 py-2 text-sm text-slate-500">Nenhum cliente encontrado</li>}
