@@ -1,8 +1,11 @@
 import { env } from './config/env';
 import { createApp } from './app';
 import { prisma } from './lib/prisma';
+import { startWeeklyScheduler } from './modules/emails/weekly-summary';
 
 const app = createApp();
+if (env.WEEKLY_SUMMARY_ENABLED) startWeeklyScheduler();
+
 const server = app.listen(env.PORT, () => {
   console.info(`🚀 Nexus Manager API em http://localhost:${env.PORT}/api/v1 (${env.NODE_ENV})`);
 });

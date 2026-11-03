@@ -19,6 +19,16 @@ const schema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().default('Nexus Manager <no-reply@nexus.local>'),
+  // Cobrança (Asaas). Sem chave, a assinatura funciona em modo simulado (somente DEMO_MODE/desenvolvimento).
+  ASAAS_API_KEY: z.string().optional(),
+  ASAAS_ENV: z.enum(['sandbox', 'production']).default('sandbox'),
+  ASAAS_WEBHOOK_TOKEN: z.string().optional(),
+  TRIAL_DAYS: z.coerce.number().int().min(0).max(90).default(14),
+  // Resumo semanal: liga o agendador interno (segunda-feira, 8h de Brasília).
+  WEEKLY_SUMMARY_ENABLED: z
+    .string()
+    .optional()
+    .transform((v) => v !== 'false'),
   // SOMENTE para ambientes de demonstração: devolve o link de recuperação na resposta da API.
   DEMO_MODE: z
     .string()

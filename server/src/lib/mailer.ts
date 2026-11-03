@@ -13,7 +13,8 @@ const transporter = env.SMTP_HOST
 /** Envia e-mail via SMTP; sem SMTP configurado, apenas registra no log (desenvolvimento/demo). */
 export async function sendMail(to: string, subject: string, html: string) {
   if (!transporter) {
-    console.info(`[mailer] SMTP não configurado. E-mail para ${to}: ${subject}\n${html.replace(/<[^>]+>/g, ' ')}`);
+    const links = [...html.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    console.info(`[mailer] SMTP não configurado. E-mail para ${to}: "${subject}"${links.length ? ` · links: ${[...new Set(links)].join(' ')}` : ''}`);
     return;
   }
   await transporter.sendMail({ from: env.SMTP_FROM, to, subject, html });

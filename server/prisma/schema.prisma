@@ -16,6 +16,25 @@ enum Role {
   SELLER  // clientes, vendas, tarefas; produtos só leitura; sem relatórios
 }
 
+enum Plan {
+  FREE
+  ESSENTIAL
+  PRO
+  BUSINESS
+}
+
+enum SubscriptionStatus {
+  TRIALING  // teste grátis (plano PRO) — ao expirar sem pagamento, cai para FREE
+  ACTIVE
+  PAST_DUE  // pagamento atrasado: continua funcionando por um período de carência
+  CANCELED
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
 enum SaleStatus {
   PENDING
   PAID
@@ -56,6 +75,21 @@ model Organization {
   name      String
   createdAt DateTime @default(now())
 
+  // Assinatura
+  plan                 Plan               @default(PRO)
+  subscriptionStatus   SubscriptionStatus @default(TRIALING)
+  billingCycle         BillingCycle       @default(MONTHLY)
+  trialEndsAt          DateTime?
+  currentPeriodEnd     DateTime?
+  billingCustomerId    String?            // id do cliente no provedor (Asaas)
+  billingSubscriptionId String?           @unique
+  pendingPlan          Plan?              // plano escolhido aguardando o primeiro pagamento
+
+  onboardingDismissedAt DateTime?
+  lastWeeklySummaryAt   DateTime?
+
+  billingEvents BillingEvent[]
+
   users     User[]
   customers Customer[]
   products  Product[]
@@ -75,6 +109,7 @@ model User {
   // Incrementado em logout global / troca de senha: invalida JWTs antigos.
   tokenVersion   Int      @default(0)
   lastLoginAt    DateTime?
+  weeklySummary  Boolean  @default(true) // recebe o resumo semanal por e-mail (admins e gerentes)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -227,4 +262,17 @@ model Task {
   customer     Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, status])
+}
+
+/// Log de eventos de cobrança (webhooks), também usado para idempotência.
+model BillingEvent {
+  id             String   @id @default(cuid())
+  organizationId String?
+  provider       String
+  externalId     String   @unique // id do evento no provedor
+  type           String
+  payload        Json
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 }

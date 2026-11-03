@@ -3,6 +3,9 @@ import { prisma } from '../../lib/prisma';
 import { conflict, notFound, unprocessable } from '../../lib/errors';
 import type { AuthUser } from '../../middleware/auth';
 import { hashPassword, publicUser } from '../auth/auth.service';
+import { assertLimit } from '../billing/billing.service';
+import { sendMail } from '../../lib/mailer';
+import { inviteEmail } from '../../lib/email-templates';
 
 export const options = (orgId: string) =>
   prisma.user.findMany({
@@ -14,12 +17,17 @@ export const options = (orgId: string) =>
 export const list = (orgId: string) =>
   prisma.user.findMany({ where: { organizationId: orgId }, select: publicUser, orderBy: { name: 'asc' } });
 
-export async function create(orgId: string, input: { name: string; email: string; role: Role; password: string }) {
+export async function create(orgId: string, input: { name: string; email: string; role: Role; password: string }, invitedBy?: string) {
   if (await prisma.user.findUnique({ where: { email: input.email } })) throw conflict('Este e-mail já está cadastrado');
-  return prisma.user.create({
+  await assertLimit(orgId, 'users');
+  const user = await prisma.user.create({
     data: { organizationId: orgId, name: input.name, email: input.email, role: input.role, passwordHash: await hashPassword(input.password) },
     select: publicUser,
   });
+  // A senha nunca vai por e-mail: o convite só avisa e aponta para o login.
+  const mail = inviteEmail(user.name, user.organization.name, invitedBy ?? 'O administrador', user.email);
+  sendMail(user.email, mail.subject, mail.html).catch((e) => console.error('[mailer] convite', e));
+  return user;
 }
 
 /** Garante que a organização nunca fique sem um administrador ativo. */
@@ -34,6 +42,8 @@ export async function update(actor: AuthUser, id: string, input: { name?: string
 
   const losesAdmin = target.role === 'ADMIN' && ((input.role && input.role !== 'ADMIN') || input.active === false);
   if (losesAdmin) await assertKeepsAdmin(actor.organizationId, id);
+
+  if (input.active === true && !target.active) await assertLimit(actor.organizationId, 'users');
 
   const revoke = input.active === false || !!input.password || (input.role && input.role !== target.role);
   return prisma.user.update({

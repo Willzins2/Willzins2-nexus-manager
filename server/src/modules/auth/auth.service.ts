@@ -4,6 +4,7 @@ import type { z } from 'zod';
 import { prisma } from '../../lib/prisma';
 import { badRequest, conflict, unauthorized } from '../../lib/errors';
 import { sendMail } from '../../lib/mailer';
+import { resetEmail, welcomeEmail } from '../../lib/email-templates';
 import { env } from '../../config/env';
 import { signToken } from '../../middleware/auth';
 import type {
@@ -26,6 +27,7 @@ export const publicUser = {
   organizationId: true,
   createdAt: true,
   lastLoginAt: true,
+  weeklySummary: true,
   organization: { select: { id: true, name: true } },
 } as const;
 
@@ -44,11 +46,15 @@ export async function register(input: z.infer<typeof registerSchema>) {
       passwordHash,
       role: 'ADMIN',
       lastLoginAt: new Date(),
-      organization: { create: { name: input.companyName } },
+      organization: {
+        create: { name: input.companyName, plan: 'PRO', subscriptionStatus: 'TRIALING', trialEndsAt: new Date(Date.now() + env.TRIAL_DAYS * 86_400_000) },
+      },
     },
     select: { ...publicUser, tokenVersion: true },
   });
   const { tokenVersion, ...safe } = user;
+  const mail = welcomeEmail(user.name, input.companyName, env.TRIAL_DAYS);
+  sendMail(user.email, mail.subject, mail.html).catch((e) => console.error('[mailer] boas-vindas', e));
   return { user: safe, token: signToken(user.id, tokenVersion) };
 }
 
@@ -94,11 +100,8 @@ export async function forgotPassword(email: string) {
   });
 
   const resetUrl = `${env.APP_URL.replace(/\/$/, '')}/redefinir-senha?token=${token}`;
-  await sendMail(
-    user.email,
-    'Recuperação de senha — Nexus Manager',
-    `<p>Olá, ${user.name}.</p><p>Para criar uma nova senha, acesse: <a href="${resetUrl}">${resetUrl}</a></p><p>O link expira em ${RESET_TTL_MINUTES} minutos. Se não foi você, ignore este e-mail.</p>`,
-  );
+  const mail = resetEmail(user.name, resetUrl, RESET_TTL_MINUTES);
+  await sendMail(user.email, mail.subject, mail.html);
   return { resetUrl: env.DEMO_MODE ? resetUrl : undefined };
 }
 

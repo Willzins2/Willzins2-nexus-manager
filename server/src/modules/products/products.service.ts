@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { prisma } from '../../lib/prisma';
 import { notFound, unprocessable } from '../../lib/errors';
 import { paged, paginate } from '../../lib/http';
+import { assertLimit } from '../billing/billing.service';
 import type { createProductSchema, listProductsSchema, productSchema, stockMovementSchema } from './products.schemas';
 
 export async function list(orgId: string, p: z.infer<typeof listProductsSchema>) {
@@ -49,6 +50,7 @@ export async function get(orgId: string, id: string) {
 }
 
 export async function create(orgId: string, userId: string, data: z.infer<typeof createProductSchema>) {
+  await assertLimit(orgId, 'products');
   return prisma.$transaction(async (tx) => {
     const product = await tx.product.create({ data: { ...data, organizationId: orgId } });
     if (data.stock > 0) {
