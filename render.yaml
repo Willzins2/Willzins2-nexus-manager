@@ -1,0 +1,31 @@
+# Blueprint do Render: cria o banco PostgreSQL e o serviço web (API + frontend) a partir do GitHub.
+# Render → New → Blueprint → selecione este repositório.
+databases:
+  - name: nexus-db
+    plan: free
+    databaseName: nexus
+    user: nexus
+
+services:
+  - type: web
+    name: nexus-manager
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm run start:demo
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nexus-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: APP_URL
+        value: https://nexus-manager.onrender.com # ajuste para a URL final do serviço
+      - key: DEMO_MODE
+        value: "true" # mostra o link de recuperação na tela; remova quando configurar SMTP
